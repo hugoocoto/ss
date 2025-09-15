@@ -16,6 +16,7 @@ char *expand(char *);
 void prompt();
 
 char *PROMPT = ">> ";
+bool alive = true;
 
 void
 prompt()
@@ -89,7 +90,9 @@ cd(char **argv)
 bool
 is_builtin(char *cmd)
 {
-        return !strcmp("cd", cmd);
+        return !strcmp("cd", cmd) ||
+               !strcmp("exit", cmd) ||
+               0;
 }
 
 int
@@ -108,6 +111,7 @@ run_builtin(char **argv, int fdin, int fdout, bool sync, int *pid)
         dup2(fdout, STDOUT_FILENO);
 
         if (!strcmp("cd", *argv)) status = cd(argv);
+        if (!strcmp("exit", *argv)) alive = false;
 
         dup2(STDIN_FILENO, fdinold);
         dup2(STDOUT_FILENO, fdoutold);
@@ -144,7 +148,6 @@ getinput()
 int
 main()
 {
-        bool alive = true;
         while (alive) {
                 prompt();
                 execute(getinput());
